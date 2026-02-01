@@ -1,0 +1,1295 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>致赵思琪</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+        
+        body {
+            background-color: #000;
+            min-height: 100vh;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            padding: 20px;
+            overflow: hidden;
+            position: relative;
+            touch-action: none;
+            backdrop-filter: blur(10px);
+        }
+        
+        /* 爱心雨特效画布 - 修复背景偏移 */
+        #heartRainCanvas {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100vw; /* 使用视口宽度 */
+            height: 100vh; /* 使用视口高度 */
+            z-index: 0;
+            pointer-events: none;
+            display: block; /* 确保正确显示 */
+        }
+        
+        /* 计时器 - 顶部居中 */
+        .love-timer {
+            position: fixed;
+            top: 30px;
+            left: 50%;
+            transform: translateX(-50%);
+            background: rgba(255, 255, 255, 0.7);
+            border-radius: 14px;
+            box-shadow: 
+                0 8px 32px rgba(0, 0, 0, 0.1), 
+                0 2px 10px rgba(0, 0, 0, 0.05), 
+                inset 0 1px 0 rgba(255, 255, 255, 0.9);
+            backdrop-filter: blur(12px);
+            -webkit-backdrop-filter: blur(12px);
+            border: 1px solid rgba(255, 255, 255, 0.5);
+            padding: 18px 25px;
+            z-index: 100;
+            font-family: "Helvetica Neue", "PingFang SC", "Microsoft YaHei", sans-serif;
+            font-weight: bold;
+            color: #000;
+            text-shadow: 1px 1px 3px rgba(0, 0, 0, 0.1);
+            letter-spacing: 1px;
+            text-align: center;
+            transition: all 0.3s ease;
+            min-width: 320px;
+            opacity: 0;
+            transform: translateX(-50%) translateY(-20px);
+            animation: fadeInDown 1s ease-out 3.5s forwards;
+        }
+        
+        /* 计时器出现动画 */
+        @keyframes fadeInDown {
+            from {
+                opacity: 0;
+                transform: translateX(-50%) translateY(-20px);
+            }
+            to {
+                opacity: 1;
+                transform: translateX(-50%) translateY(0);
+            }
+        }
+        
+        /* 计时器悬浮效果 */
+        .love-timer:hover {
+            box-shadow: 
+                0 12px 40px rgba(0, 0, 0, 0.15), 
+                0 4px 15px rgba(0, 0, 0, 0.08), 
+                inset 0 1px 0 rgba(255, 255, 255, 1);
+            transform: translateX(-50%) translateY(-2px);
+        }
+        
+        /* 计时器标题 */
+        .timer-title {
+            font-size: 16px;
+            margin-bottom: 8px;
+            color: #333;
+            font-weight: 600;
+            border-bottom: 1px solid rgba(0, 0, 0, 0.1);
+            padding-bottom: 5px;
+        }
+        
+        /* 计时器数字 */
+        .timer-numbers {
+            font-size: 24px;
+            color: #e63946;
+            font-weight: 800;
+            line-height: 1.4;
+        }
+        
+        /* 计时器单位 */
+        .timer-unit {
+            font-size: 14px;
+            color: #555;
+            font-weight: 600;
+            margin-left: 4px;
+            margin-right: 8px;
+        }
+        
+        /* 中央窗口 - iOS 26液态玻璃质感 */
+        .center-window {
+            width: 240px;
+            height: 190px;
+            background: rgba(255, 255, 255, 0.7);
+            border-radius: 16px;
+            box-shadow: 
+                0 8px 32px rgba(0, 0, 0, 0.1), 
+                0 2px 10px rgba(0, 0, 0, 0.05), 
+                inset 0 1px 0 rgba(255, 255, 255, 0.9);
+            backdrop-filter: blur(12px);
+            -webkit-backdrop-filter: blur(12px);
+            border: 1px solid rgba(255, 255, 255, 0.5);
+            position: absolute;
+            overflow: hidden;
+            z-index: 10;
+            cursor: move;
+            user-select: none;
+            top: 50%;
+            left: 50%;
+            transform: translate(-50%, -50%);
+            transition: all 0.3s ease;
+            opacity: 0;
+            animation: centerWindowAppear 2s ease-out forwards;
+        }
+        
+        /* 中央窗口浮现动画 */
+        @keyframes centerWindowAppear {
+            0% {
+                opacity: 0;
+                transform: translate(-50%, -50%) scale(0.8);
+                filter: blur(10px);
+            }
+            50% {
+                opacity: 0.5;
+                transform: translate(-50%, -50%) scale(1.05);
+                filter: blur(5px);
+            }
+            100% {
+                opacity: 1;
+                transform: translate(-50%, -50%) scale(1);
+                filter: blur(0);
+            }
+        }
+        
+        /* 悬浮液态光影效果 */
+        .center-window:hover {
+            box-shadow: 
+                0 12px 40px rgba(0, 0, 0, 0.15), 
+                0 4px 15px rgba(0, 0, 0, 0.08), 
+                inset 0 1px 0 rgba(255, 255, 255, 1);
+            transform: translate(-50%, calc(-50% - 2px));
+        }
+        
+        /* 周围窗口 - iOS 26液态玻璃质感（缩小版） */
+        .heart-window {
+            width: 100px;
+            height: 80px;
+            background: rgba(255, 255, 255, 0.7);
+            border-radius: 14px;
+            box-shadow: 
+                0 8px 32px rgba(0, 0, 0, 0.1), 
+                0 2px 10px rgba(0, 0, 0, 0.05), 
+                inset 0 1px 0 rgba(255, 255, 255, 0.9);
+            backdrop-filter: blur(12px);
+            -webkit-backdrop-filter: blur(12px);
+            border: 1px solid rgba(255, 255, 255, 0.5);
+            position: absolute;
+            overflow: hidden;
+            cursor: move;
+            user-select: none;
+            z-index: 5;
+            transition: all 0.3s ease;
+            opacity: 0;
+            /* 移除原有的初始transform，将由JavaScript控制 */
+        }
+        
+        /* 周围窗口浮现动画 */
+        .heart-window.appear {
+            animation: heartWindowAppear 0.8s ease-out forwards;
+        }
+        
+        @keyframes heartWindowAppear {
+            0% {
+                opacity: 0;
+                transform: translate(-50%, -50%) translateY(-30px) scale(0.9);
+            }
+            70% {
+                opacity: 0.8;
+                transform: translate(-50%, -50%) translateY(5px) scale(1.02);
+            }
+            100% {
+                opacity: 1;
+                transform: translate(-50%, -50%) translateY(0) scale(1);
+            }
+        }
+        
+        /* 周围窗口悬浮效果 */
+        .heart-window:hover {
+            box-shadow: 
+                0 12px 40px rgba(0, 0, 0, 0.15), 
+                0 4px 15px rgba(0, 0, 0, 0.08), 
+                inset 0 1px 0 rgba(255, 255, 255, 1);
+            transform: translate(-50%, -50%) translateY(-2px) !important;
+        }
+        
+        /* 窗口通用样式 - 周围窗口标题栏减小高度 */
+        .window-header {
+            height: 22px; /* 周围窗口标题栏从30px减小到22px */
+            padding: 0 8px; /* 周围窗口从10px减小到8px */
+            display: flex;
+            align-items: center;
+            gap: 4px; /* 周围窗口从6px减小到4px */
+            cursor: move;
+            position: relative;
+            z-index: 10;
+            backdrop-filter: blur(10px);
+            background: rgba(240, 240, 240, 0.5);
+            border-top-left-radius: inherit;
+            border-top-right-radius: inherit;
+            overflow: hidden;
+            border-bottom: 1px solid rgba(0, 0, 0, 0.1);
+        }
+        
+        /* 中央窗口标题栏保持不变 */
+        .center-window .window-header {
+            height: 30px; /* 中央窗口保持30px */
+            padding: 0 10px; /* 中央窗口保持10px */
+            gap: 6px; /* 中央窗口保持6px */
+        }
+        
+        /* 窗口控制按钮（红黄绿）- 缩小版（仅周围窗口） */
+        .window-btn {
+            width: 6px; /* 周围窗口从8px缩小到6px */
+            height: 6px; /* 周围窗口从8px缩小到6px */
+            border-radius: 50%;
+            position: relative;
+            box-shadow: 
+                0 1px 2px rgba(0, 0, 0, 0.3),
+                inset 0 1px 1px rgba(255, 255, 255, 0.4);
+        }
+        
+        /* 中央窗口按钮保持不变 */
+        .center-window .window-btn {
+            width: 8px; /* 中央窗口保持8px */
+            height: 8px; /* 中央窗口保持8px */
+        }
+        
+        .window-btn::after {
+            content: "";
+            position: absolute;
+            top: 50%;
+            left: 50%;
+            transform: translate(-50%, -50%);
+            width: 2px; /* 周围窗口从3px缩小到2px */
+            height: 2px; /* 周围窗口从3px缩小到2px */
+            border-radius: 50%;
+            background: rgba(255, 255, 255, 0.5);
+        }
+        
+        /* 中央窗口按钮内点保持不变 */
+        .center-window .window-btn::after {
+            width: 3px; /* 中央窗口保持3px */
+            height: 3px; /* 中央窗口保持3px */
+        }
+        
+        .window-btn.close {
+            background: linear-gradient(135deg, #ff5f57 0%, #ff3b30 100%);
+        }
+        
+        .window-btn.minimize {
+            background: linear-gradient(135deg, #ffbd2e 0%, #ffa500 100%);
+        }
+        
+        .window-btn.maximize {
+            background: linear-gradient(135deg, #28ca42 0%, #1db130 100%);
+        }
+        
+        /* 窗口标题 */
+        .window-title {
+            font-family: -apple-system, BlinkMacSystemFont, sans-serif;
+            font-size: 11px; /* 周围窗口从12px缩小到11px */
+            color: #333;
+            margin-left: 6px; /* 周围窗口从8px缩小到6px */
+        }
+        
+        /* 中央窗口标题保持不变 */
+        .center-window .window-title {
+            font-size: 12px; /* 中央窗口保持12px */
+            margin-left: 8px; /* 中央窗口保持8px */
+        }
+        
+        /* 周围窗口内容区域调整 */
+        .heart-window .window-content {
+            height: calc(100% - 22px); /* 从30px调整到22px */
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            background-color: transparent;
+            text-align: center;
+            padding: 5px;
+            overflow: hidden;
+        }
+        
+        /* 中央窗口内容区域保持不变 */
+        .center-window .window-content {
+            height: calc(100% - 30px); /* 中央窗口保持30px */
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            background-color: transparent;
+            text-align: center;
+            padding: 5px;
+            overflow: hidden;
+        }
+        
+        /* 中央窗口文字（保持不变） */
+        .center-window .love-text {
+            font-family: "Helvetica Neue", "PingFang SC", "Microsoft YaHei", sans-serif;
+            font-size: 36px;
+            font-weight: bold;
+            color: #000;
+            text-shadow: 2px 2px 4px rgba(0, 0, 0, 0.1);
+            letter-spacing: 1px;
+            line-height: 1.1;
+            padding: 0 10px;
+        }
+        
+        /* 周围窗口文字 - 缩小版（确保文字完整显示） */
+        .heart-window .heart-text {
+            font-family: "Helvetica Neue", "PingFang SC", "Microsoft YaHei", sans-serif;
+            font-size: 12px;
+            font-weight: 600;
+            color: #000;
+            line-height: 1.2;
+            padding: 0 8px;
+            word-wrap: break-word;
+            overflow: hidden;
+            max-height: 100%;
+            display: -webkit-box;
+            -webkit-line-clamp: 3;
+            -webkit-box-orient: vertical;
+        }
+        
+        /* 心形排列样式 */
+        .heart-container {
+            position: absolute;
+            top: 50%;
+            left: 50%;
+            transform: translate(-50%, -50%);
+            width: 800px;
+            height: 800px;
+            z-index: 1;
+        }
+        
+        /* 窗口拖拽反馈 */
+        .dragging {
+            opacity: 0.9;
+            box-shadow: 
+                0 20px 50px rgba(0, 0, 0, 0.3),
+                0 4px 15px rgba(0, 0, 0, 0.15),
+                inset 0 1px 0 rgba(255, 255, 255, 1) !important;
+            z-index: 10000 !important;
+        }
+        
+        /* 说明文本 */
+        .instructions {
+            position: absolute;
+            bottom: 20px;
+            left: 0;
+            width: 100%;
+            text-align: center;
+            color: rgba(255, 255, 255, 0.6);
+            font-family: "Helvetica Neue", sans-serif;
+            font-size: 14px;
+            z-index: 100;
+            pointer-events: none;
+            opacity: 0;
+            animation: fadeIn 1s ease-out 4s forwards;
+        }
+        
+        .instip {
+            position: absolute;
+            bottom: 60px;
+            left: 0;
+            width: 100%;
+            text-align: center;
+            color: rgba(255, 255, 255, 0.6);
+            font-family: "Helvetica Neue", sans-serif;
+            font-size: 14px;
+            z-index: 100;
+            pointer-events: none;
+            opacity: 0;
+            animation: fadeIn 1s ease-out 4.2s forwards;
+        }
+        
+        @keyframes fadeIn {
+            from { opacity: 0; }
+            to { opacity: 1; }
+        }
+        
+        @media (max-width: 1000px) {
+            .center-window {
+                width: 200px;
+                height: 160px;
+            }
+            
+            .center-window .love-text {
+                font-size: 32px;
+            }
+            
+            .heart-window {
+                width: 90px;
+                height: 72px;
+            }
+            
+            .heart-window .heart-text {
+                font-size: 11px;
+                padding: 0 6px;
+            }
+            
+            .heart-window .window-header {
+                height: 20px; /* 响应式调整 */
+                padding: 0 6px;
+            }
+            
+            .heart-window .window-btn {
+                width: 5px;
+                height: 5px;
+            }
+            
+            .heart-window .window-btn::after {
+                width: 2px;
+                height: 2px;
+            }
+            
+            .heart-window .window-title {
+                font-size: 10px;
+            }
+            
+            .heart-window .window-content {
+                height: calc(100% - 20px);
+            }
+            
+            .heart-container {
+                width: 600px;
+                height: 600px;
+            }
+            
+            /* 计时器响应式 */
+            .love-timer {
+                top: 20px;
+                padding: 15px 20px;
+                min-width: 280px;
+            }
+            
+            .timer-numbers {
+                font-size: 20px;
+            }
+        }
+        
+        @media (max-width: 700px) {
+            .center-window {
+                width: 180px;
+                height: 140px;
+            }
+            
+            .center-window .love-text {
+                font-size: 28px;
+            }
+            
+            .heart-window {
+                width: 80px;
+                height: 64px;
+            }
+            
+            .heart-window .heart-text {
+                font-size: 10px;
+                padding: 0 5px;
+            }
+            
+            .heart-window .window-header {
+                height: 18px; /* 响应式调整 */
+                padding: 0 5px;
+            }
+            
+            .heart-window .window-btn {
+                width: 4px;
+                height: 4px;
+            }
+            
+            .heart-window .window-btn::after {
+                width: 1.5px;
+                height: 1.5px;
+            }
+            
+            .heart-window .window-title {
+                font-size: 9px;
+            }
+            
+            .heart-window .window-content {
+                height: calc(100% - 18px);
+            }
+            
+            .heart-container {
+                width: 500px;
+                height: 500px;
+            }
+            
+            /* 计时器响应式 */
+            .love-timer {
+                top: 15px;
+                padding: 12px 15px;
+                min-width: 240px;
+                font-size: 14px;
+            }
+            
+            .timer-title {
+                font-size: 14px;
+            }
+            
+            .timer-numbers {
+                font-size: 18px;
+            }
+            
+            .timer-unit {
+                font-size: 12px;
+                margin-right: 4px;
+            }
+        }
+        
+        @media (max-width: 480px) {
+            .love-timer {
+                top: 10px;
+                width: 90%;
+                min-width: 200px;
+                max-width: 300px;
+            }
+            
+            .timer-numbers {
+                font-size: 16px;
+            }
+            
+            .center-window {
+                width: 160px;
+                height: 130px;
+            }
+            
+            .center-window .love-text {
+                font-size: 24px;
+            }
+            
+            .heart-window {
+                width: 70px;
+                height: 56px;
+            }
+            
+            .heart-window .heart-text {
+                font-size: 9px;
+                padding: 0 4px;
+            }
+            
+            .heart-window .window-header {
+                height: 16px; /* 响应式调整 */
+                padding: 0 4px;
+            }
+            
+            .heart-window .window-btn {
+                width: 3px;
+                height: 3px;
+            }
+            
+            .heart-window .window-btn::after {
+                width: 1px;
+                height: 1px;
+            }
+            
+            .heart-window .window-title {
+                font-size: 8px;
+            }
+            
+            .heart-window .window-content {
+                height: calc(100% - 16px);
+            }
+        }
+    </style>
+</head>
+<body>
+    <!-- 爱心雨特效画布 -->
+    <canvas id="heartRainCanvas"></canvas>
+    
+    <!-- 顶部居中的爱情计时器 -->
+    <div class="love-timer" id="loveTimer">
+        <div class="timer-title">我们认识已经</div>
+        <div class="timer-numbers">
+            <span id="days">0</span><span class="timer-unit">天</span>
+            <span id="hours">0</span><span class="timer-unit">小时</span>
+            <span id="minutes">0</span><span class="timer-unit">分钟</span>
+            <span id="seconds">0</span><span class="timer-unit">秒</span>
+        </div>
+    </div>
+    
+    <!-- 中央窗口 -->
+    <div class="center-window" id="centerWindow">
+        <div class="window-header">
+            <div class="window-btn close"></div>
+            <div class="window-btn minimize"></div>
+            <div class="window-btn maximize"></div>
+            <div class="window-title">宝宝！</div>
+        </div>
+        <div class="window-content">
+            <div class="love-text">你是　　　的唯一</div>
+        </div>
+    </div>
+    
+    <!-- 心形容器 -->
+    <div class="heart-container" id="heartContainer">
+        <!-- 周围窗口将通过JavaScript动态创建 -->
+    </div>
+    
+    <!-- 说明文本 -->
+    <div class="instructions">拖动任意窗口可以移动位置，拖动时会覆盖其他窗口</div>
+    <div class="instip">世界这么大还是遇见你</div>
+
+    <script>
+        // ================= 爱心雨特效 - 修复背景偏移 =================
+        class HeartRain {
+            constructor() {
+                this.canvas = document.getElementById('heartRainCanvas');
+                this.ctx = this.canvas.getContext('2d');
+                this.hearts = [];
+                this.heartCount = 50; // 爱心数量
+                this.colors = ['#ff5c8d', '#ff7eb3', '#ffafcc', '#ffc2d1', '#ff8fab']; // 粉色系爱心颜色
+                this.animationId = null;
+                
+                this.init();
+                this.animate();
+                // 修复：添加更稳定的resize监听
+                this.resizeHandler = () => this.resize();
+                window.addEventListener('resize', this.resizeHandler);
+            }
+            
+            init() {
+                // 确保在初始化时正确设置画布尺寸
+                this.canvas.style.width = '100vw';
+                this.canvas.style.height = '100vh';
+                this.canvas.width = window.innerWidth;
+                this.canvas.height = window.innerHeight;
+                this.createHearts();
+            }
+            
+            resize() {
+                // 修复：正确获取当前视口尺寸
+                const width = window.innerWidth;
+                const height = window.innerHeight;
+                
+                // 设置画布尺寸与CSS尺寸一致
+                this.canvas.width = width;
+                this.canvas.height = height;
+                
+                // 重新创建爱心，适应新尺寸
+                this.createHearts();
+            }
+            
+            createHearts() {
+                this.hearts = [];
+                for (let i = 0; i < this.heartCount; i++) {
+                    this.hearts.push({
+                        x: Math.random() * this.canvas.width,
+                        y: Math.random() * this.canvas.height,
+                        size: Math.random() * 20 + 5,
+                        speed: Math.random() * 2 + 0.5,
+                        color: this.colors[Math.floor(Math.random() * this.colors.length)],
+                        swing: Math.random() * Math.PI * 2,
+                        swingSpeed: Math.random() * 0.05 + 0.02,
+                        swingAmplitude: Math.random() * 30 + 10,
+                        rotation: Math.random() * Math.PI * 2,
+                        rotationSpeed: Math.random() * 0.02 - 0.01,
+                        opacity: Math.random() * 0.5 + 0.3
+                    });
+                }
+            }
+            
+            drawHeart(x, y, size, rotation, color, opacity) {
+                this.ctx.save();
+                this.ctx.translate(x, y);
+                this.ctx.rotate(rotation);
+                this.ctx.scale(size / 20, size / 20);
+                
+                this.ctx.beginPath();
+                for (let i = 0; i < 30; i++) {
+                    const t = i / 30 * Math.PI * 2;
+                    // 心形曲线方程
+                    const px = 16 * Math.pow(Math.sin(t), 3);
+                    const py = -(13 * Math.cos(t) - 5 * Math.cos(2*t) - 2 * Math.cos(3*t) - Math.cos(4*t));
+                    
+                    if (i === 0) {
+                        this.ctx.moveTo(px, py);
+                    } else {
+                        this.ctx.lineTo(px, py);
+                    }
+                }
+                this.ctx.closePath();
+                
+                // 创建渐变填充
+                const gradient = this.ctx.createRadialGradient(0, 0, 5, 0, 0, 15);
+                gradient.addColorStop(0, color + 'ff');
+                gradient.addColorStop(1, color + '66');
+                
+                this.ctx.fillStyle = gradient;
+                this.ctx.globalAlpha = opacity;
+                this.ctx.fill();
+                
+                // 添加发光效果
+                this.ctx.shadowColor = color;
+                this.ctx.shadowBlur = 10;
+                this.ctx.strokeStyle = color + 'aa';
+                this.ctx.lineWidth = 1;
+                this.ctx.stroke();
+                
+                this.ctx.restore();
+            }
+            
+            updateHearts() {
+                for (let heart of this.hearts) {
+                    // 下落
+                    heart.y += heart.speed;
+                    
+                    // 左右摆动
+                    heart.swing += heart.swingSpeed;
+                    heart.x += Math.sin(heart.swing) * 0.3;
+                    
+                    // 旋转
+                    heart.rotation += heart.rotationSpeed;
+                    
+                    // 如果爱心超出底部，重置到顶部
+                    if (heart.y > this.canvas.height + 50) {
+                        heart.y = -50;
+                        heart.x = Math.random() * this.canvas.width;
+                    }
+                    
+                    // 如果爱心超出左右边界，重置
+                    if (heart.x > this.canvas.width + 50) {
+                        heart.x = -50;
+                    } else if (heart.x < -50) {
+                        heart.x = this.canvas.width + 50;
+                    }
+                }
+            }
+            
+            animate() {
+                // 清除画布，使用半透明黑色创建拖尾效果
+                this.ctx.fillStyle = 'rgba(0, 0, 0, 0.1)';
+                this.ctx.fillRect(0, 0, this.canvas.width, this.canvas.height);
+                
+                // 更新并绘制所有爱心
+                this.updateHearts();
+                for (let heart of this.hearts) {
+                    this.drawHeart(
+                        heart.x + Math.sin(heart.swing) * heart.swingAmplitude, 
+                        heart.y, 
+                        heart.size, 
+                        heart.rotation, 
+                        heart.color, 
+                        heart.opacity
+                    );
+                }
+                
+                this.animationId = requestAnimationFrame(() => this.animate());
+            }
+            
+            // 清理方法
+            destroy() {
+                if (this.animationId) {
+                    cancelAnimationFrame(this.animationId);
+                }
+                window.removeEventListener('resize', this.resizeHandler);
+            }
+        }
+        
+        // ================= 爱情计时器 =================
+        // 爱情计时器 - 从2025年12月30日20:25开始
+        const loveStartTime = new Date('2025-12-30T20:25:00');
+        
+        function updateLoveTimer() {
+            const now = new Date();
+            const diff = now - loveStartTime;
+            
+            // 计算天数
+            const days = Math.floor(diff / (1000 * 60 * 60 * 24));
+            
+            // 计算剩余的小时
+            const hours = Math.floor((diff % (1000 * 60 * 60 * 24)) / (1000 * 60 * 60));
+            
+            // 计算剩余的分钟
+            const minutes = Math.floor((diff % (1000 * 60 * 60)) / (1000 * 60));
+            
+            // 计算剩余的秒数
+            const seconds = Math.floor((diff % (1000 * 60)) / 1000);
+            
+            // 更新显示
+            document.getElementById('days').textContent = days;
+            document.getElementById('hours').textContent = hours;
+            document.getElementById('minutes').textContent = minutes;
+            document.getElementById('seconds').textContent = seconds;
+            
+            // 添加心跳效果
+            const timerElement = document.getElementById('loveTimer');
+            if (seconds % 2 === 0) {
+                timerElement.style.boxShadow = 
+                    "0 8px 32px rgba(231, 57, 70, 0.2), " +
+                    "0 2px 10px rgba(231, 57, 70, 0.1), " +
+                    "inset 0 1px 0 rgba(255, 255, 255, 0.9)";
+            } else {
+                timerElement.style.boxShadow = 
+                    "0 8px 32px rgba(0, 0, 0, 0.1), " +
+                    "0 2px 10px rgba(0, 0, 0, 0.05), " +
+                    "inset 0 1px 0 rgba(255, 255, 255, 0.9)";
+            }
+        }
+        
+        // ================= 不重复情话数组 =================
+        const loveMessages = [
+            "你是我的星辰大海",
+            "与你相遇好幸运",
+            "一生一世一双人",
+            "愿得一人心，白首不离",
+            "心悦君兮君不知",
+            "春风十里不如你",
+            "余生请多指教",
+            "你是我限量快乐",
+            "人间不值得，你值得",
+            "遇见你三生有幸",
+            "我的世界因你完整",
+            "执子之手与子偕老",
+            "你是我的唯一",
+            "心动是你心安是你",
+            "有你在风都甜",
+            "往后余生风雪是你",
+            "你是我最美遇见",
+            "想和你走遍世界",
+            "你的笑容如阳光",
+            "每天醒来就想你",
+            "你是我最美风景",
+            "爱你最正确的事",
+            "你名是我最美情书",
+            "一见钟情再见倾心",
+            "有你每天情人节",
+            "你是我心里秘密",
+            "想和你慢慢变老",
+            "你让世界变完整",
+            "爱你是我本能",
+            "你是我心尖人",
+            "想把你揉进生命",
+            "你是糖甜到忧伤",
+            "爱你如呼吸自然",
+            "你是我不褪色梦",
+            "想和你分享日出日落",
+            "你怀抱是我港湾",
+            "爱你一生承诺",
+            "你是我心跳理由",
+            "想和你看遍繁华",
+            "你存在是我幸福",
+            "爱你最勇敢的事",
+            "你是我灵魂伴侣",
+            "想共度平凡日子",
+            "你眼中有星辰大海",
+            "爱你无需言语",
+            "你是我生命奇迹",
+            "想创造美好回忆",
+            "你声是我最爱旋律",
+            "爱你最坚定选择",
+            "你是我心柔软处",
+            "想共度漫长岁月",
+            "你笑容治愈烦恼",
+            "爱你最幸福的事",
+            "你是我前进动力",
+            "想和你走过四季",
+            "你温暖是我依靠",
+            "爱你最美好意外",
+            "你是我光",
+            "想和你看细水长流",
+            "你陪伴是我财富",
+            "爱你甜蜜责任",
+            "你是我心中永恒",
+            "想和你创未来",
+            "你爱让我更好",
+            "爱你最真诚告白",
+            "你是我梦中公主",
+            "你温柔让我沉醉",
+            "爱你最珍贵拥有",
+            "你是我心中唯一",
+            "想和你分享人生",
+            "你存在让我完整",
+            "爱你最深眷恋"
+        ];
+        
+        // ================= 主要功能 =================
+        // 用于记录窗口的z-index层级
+        let maxZIndex = 100;
+        const windowZIndices = new Map();
+        
+        // 计算心形坐标（使用经典心形方程）- 修复分布不规则问题
+        function calculateHeartPositions(count, centerX, centerY, baseRadius) {
+            const positions = [];
+            
+            // 使用更规则的心形分布算法
+            // 将72个点均匀分布在心形曲线上
+            
+            // 计算每个点在心形曲线上的角度
+            const angleStep = (2 * Math.PI) / count;
+            
+            for (let i = 0; i < count; i++) {
+                // 调整角度，使点分布更均匀
+                let t = i * angleStep;
+                
+                // 心形方程
+                const x = 16 * Math.pow(Math.sin(t), 3);
+                const y = 13 * Math.cos(t) - 5 * Math.cos(2*t) - 2 * Math.cos(3*t) - Math.cos(4*t);
+                
+                // 转换为实际坐标
+                const scaledX = x * baseRadius / 20;
+                const scaledY = -y * baseRadius / 20;
+                
+                positions.push({
+                    x: centerX + scaledX,
+                    y: centerY + scaledY,
+                    originalX: centerX + scaledX,
+                    originalY: centerY + scaledY
+                });
+            }
+            
+            return positions;
+        }
+        
+        // 创建周围窗口
+        function createHeartWindows() {
+            const heartContainer = document.getElementById('heartContainer');
+            const containerRect = heartContainer.getBoundingClientRect();
+            const centerX = containerRect.width / 2;
+            const centerY = containerRect.height / 2;
+            const baseRadius = Math.min(containerRect.width, containerRect.height) * 0.38;
+            
+            // 固定窗口数量为72个
+            const windowCount = 72;
+            
+            // 确保有足够的不重复情话
+            const availableMessages = [...loveMessages];
+            
+            // 随机打乱情话顺序
+            const shuffledMessages = availableMessages
+                .sort(() => Math.random() - 0.5)
+                .slice(0, windowCount);
+            
+            const positions = calculateHeartPositions(windowCount, centerX, centerY, baseRadius);
+            
+            // 按y坐标从大到小排序（从下到上）- 为了喷泉效果，下面的先出现
+            const sortedPositions = positions
+                .map((pos, index) => ({...pos, index, message: shuffledMessages[index]}))
+                .sort((a, b) => b.y - a.y);
+            
+            for (let i = 0; i < sortedPositions.length; i++) {
+                const {x, y, index, message} = sortedPositions[i];
+                
+                const windowElement = document.createElement('div');
+                windowElement.className = 'heart-window';
+                windowElement.dataset.index = index;
+                windowElement.dataset.originalX = x;
+                windowElement.dataset.originalY = y;
+                
+                // 设置初始位置在屏幕底部边缘随机位置（喷泉效果起点）
+                // 为了有喷泉效果，起始位置在屏幕下方，x坐标在屏幕宽度内随机
+                const startX = Math.random() * window.innerWidth;
+                const startY = window.innerHeight + 100; // 从屏幕底部之外开始
+                
+                windowElement.style.left = `${startX}px`;
+                windowElement.style.top = `${startY}px`;
+                windowElement.style.transform = 'translate(-50%, -50%)';
+                
+                const zIndexValue = 20 + i;
+                windowElement.style.zIndex = zIndexValue;
+                windowZIndices.set(windowElement, zIndexValue);
+                
+                windowElement.innerHTML = `
+                    <div class="window-header">
+                        <div class="window-btn close"></div>
+                        <div class="window-btn minimize"></div>
+                        <div class="window-btn maximize"></div>
+                    </div>
+                    <div class="window-content">
+                        <div class="heart-text">${message}</div>
+                    </div>
+                `;
+                
+                heartContainer.appendChild(windowElement);
+                
+                // 存储目标位置
+                windowElement.targetX = x;
+                windowElement.targetY = y;
+                windowElement.startX = startX;
+                windowElement.startY = startY;
+                windowElement.message = message;
+            }
+            
+            return sortedPositions.length;
+        }
+        
+        // 阶段2：周围窗口从下方像喷泉一样出现
+        function showHeartWindowsFountain(totalWindows) {
+            const heartWindows = document.querySelectorAll('.heart-window');
+            
+            // 按y坐标从大到小排序（从下到上）- 为了喷泉效果，下面的先出现
+            const sortedWindows = Array.from(heartWindows)
+                .sort((a, b) => b.targetY - a.targetY);
+            
+            // 计算每个窗口的时间间隔：每秒8个 = 1000ms / 8 = 125ms
+            const intervalMs = 125;
+            
+            // 为每个窗口设置动画，使用不同的延迟
+            sortedWindows.forEach((window, index) => {
+                setTimeout(() => {
+                    // 计算喷泉效果的移动路径
+                    // 从屏幕底部向上移动到目标位置
+                    
+                    // 使用CSS transition实现喷泉式移动
+                    window.style.transition = 'left 1.5s cubic-bezier(0.175, 0.885, 0.32, 1.275), top 1.5s cubic-bezier(0.175, 0.885, 0.32, 1.275), opacity 0.5s ease-out';
+                    window.style.left = `${window.targetX}px`;
+                    window.style.top = `${window.targetY}px`;
+                    window.style.opacity = '0.8';
+                    
+                    // 添加一点旋转效果，模拟喷泉的旋转
+                    const rotation = (Math.random() - 0.5) * 10;
+                    window.style.transform = `translate(-50%, -50%) rotate(${rotation}deg)`;
+                    
+                    // 动画结束后添加appear类并移除临时效果
+                    setTimeout(() => {
+                        window.classList.add('appear');
+                        window.style.transition = '';
+                        window.style.transform = 'translate(-50%, -50%)';
+                        window.style.opacity = '1';
+                        
+                        // 如果是最后一个窗口，为所有窗口添加拖拽功能
+                        if (index === sortedWindows.length - 1) {
+                            setTimeout(() => {
+                                sortedWindows.forEach(window => {
+                                    makeDraggable(window);
+                                });
+                            }, 200);
+                        }
+                    }, 1500);
+                }, 2200 + (index * intervalMs)); // 中央窗口动画2秒后开始，每个窗口间隔125ms
+            });
+        }
+        
+        // ================= 完全重新设计的窗口拖拽功能 =================
+        function makeDraggable(element) {
+            let isDragging = false;
+            let startX, startY;
+            let elementLeft, elementTop;
+            
+            element.addEventListener('mousedown', dragStart);
+            element.addEventListener('touchstart', dragStart);
+            
+            function dragStart(e) {
+                e.preventDefault();
+                e.stopPropagation();
+                
+                const isHeaderClicked = e.target.closest('.window-header') || 
+                                       e.target.classList.contains('window-btn') ||
+                                       e.target.classList.contains('window-title') ||
+                                       e.target.classList.contains('heart-text') ||
+                                       e.target.classList.contains('window-content');
+                if (!isHeaderClicked && !element.classList.contains('center-window')) return;
+                
+                // 获取鼠标/触摸起始位置
+                startX = (e.type === 'touchstart' ? e.touches[0].clientX : e.clientX);
+                startY = (e.type === 'touchstart' ? e.touches[0].clientY : e.clientY);
+                
+                // 获取元素当前位置
+                const style = window.getComputedStyle(element);
+                let left = parseFloat(style.left) || 0;
+                let top = parseFloat(style.top) || 0;
+                
+                // 对于center-window，位置是相对于视口的
+                if (element.classList.contains('center-window')) {
+                    const rect = element.getBoundingClientRect();
+                    left = rect.left + rect.width/2;
+                    top = rect.top + rect.height/2;
+                }
+                
+                elementLeft = left;
+                elementTop = top;
+                
+                // 提升层级
+                maxZIndex++;
+                element.style.zIndex = maxZIndex;
+                windowZIndices.set(element, maxZIndex);
+                
+                isDragging = true;
+                element.classList.add('dragging');
+                
+                // 添加事件监听器
+                document.addEventListener('mousemove', drag);
+                document.addEventListener('touchmove', drag, { passive: false });
+                document.addEventListener('mouseup', dragEnd);
+                document.addEventListener('touchend', dragEnd);
+                document.addEventListener('touchcancel', dragEnd);
+            }
+            
+            function drag(e) {
+                if (!isDragging) return;
+                
+                e.preventDefault();
+                e.stopPropagation();
+                
+                // 获取当前鼠标/触摸位置
+                const currentX = (e.type === 'touchmove' ? e.touches[0].clientX : e.clientX);
+                const currentY = (e.type === 'touchmove' ? e.touches[0].clientY : e.clientY);
+                
+                // 计算移动距离
+                const deltaX = currentX - startX;
+                const deltaY = currentY - startY;
+                
+                // 计算新位置
+                const newLeft = elementLeft + deltaX;
+                const newTop = elementTop + deltaY;
+                
+                // 应用新位置
+                element.style.left = `${newLeft}px`;
+                element.style.top = `${newTop}px`;
+                element.style.transform = 'translate(-50%, -50%)';
+            }
+            
+            function dragEnd(e) {
+                if (!isDragging) return;
+                
+                isDragging = false;
+                element.classList.remove('dragging');
+                
+                // 移除事件监听器
+                document.removeEventListener('mousemove', drag);
+                document.removeEventListener('touchmove', drag);
+                document.removeEventListener('mouseup', dragEnd);
+                document.removeEventListener('touchend', dragEnd);
+                document.removeEventListener('touchcancel', dragEnd);
+            }
+        }
+        
+        // 初始化中央窗口
+        function initCenterWindow() {
+            const centerWindow = document.getElementById('centerWindow');
+            
+            // 为中央窗口设置z-index
+            centerWindow.style.zIndex = "100";
+            windowZIndices.set(centerWindow, 100);
+            maxZIndex = 100;
+            
+            // 更新中央窗口文本
+            const loveText = centerWindow.querySelector('.love-text');
+            if (loveText) {
+                loveText.textContent = "你是　　　我的唯一";
+            }
+            
+            return centerWindow;
+        }
+        
+        // ================= 初始化 =================
+        let heartRainInstance = null;
+        
+        window.onload = function() {
+            // 启动爱心雨特效
+            heartRainInstance = new HeartRain();
+            
+            // 启动爱情计时器（每秒更新一次）
+            updateLoveTimer();
+            setInterval(updateLoveTimer, 1000);
+            
+            // 初始化中央窗口
+            const centerWindow = initCenterWindow();
+            
+            // 创建周围窗口
+            const windowCount = createHeartWindows();
+            
+            // 阶段1：主窗口动画完成后，开始阶段2动画
+            setTimeout(() => {
+                showHeartWindowsFountain(windowCount);
+            }, 2000); // 中央窗口动画2秒后开始周围窗口动画
+            
+            // 为主窗口添加拖拽功能（动画结束后）
+            setTimeout(() => {
+                makeDraggable(centerWindow);
+            }, 2000);
+            
+            // 为计时器添加拖拽功能
+            setTimeout(() => {
+                const timerElement = document.getElementById('loveTimer');
+                let isDraggingTimer = false;
+                let timerStartX, timerStartY;
+                let timerInitialLeft, timerInitialTop;
+                
+                timerElement.addEventListener('mousedown', function(e) {
+                    e.preventDefault();
+                    
+                    if (!e.target.closest('.love-timer')) return;
+                    
+                    timerStartX = e.clientX;
+                    timerStartY = e.clientY;
+                    
+                    const style = window.getComputedStyle(timerElement);
+                    const transform = style.transform;
+                    
+                    if (transform !== 'none' && transform !== '') {
+                        const rect = timerElement.getBoundingClientRect();
+                        timerInitialLeft = rect.left;
+                        timerInitialTop = rect.top;
+                    } else {
+                        timerInitialLeft = parseFloat(style.left) || 0;
+                        timerInitialTop = parseFloat(style.top) || 0;
+                    }
+                    
+                    isDraggingTimer = true;
+                    
+                    function onMouseMove(e) {
+                        if (!isDraggingTimer) return;
+                        
+                        const dx = e.clientX - timerStartX;
+                        const dy = e.clientY - timerStartY;
+                        timerElement.style.left = `${timerInitialLeft + dx}px`;
+                        timerElement.style.top = `${timerInitialTop + dy}px`;
+                        timerElement.style.transform = 'none';
+                    }
+                    
+                    function onMouseUp() {
+                        isDraggingTimer = false;
+                        document.removeEventListener('mousemove', onMouseMove);
+                        document.removeEventListener('mouseup', onMouseUp);
+                    }
+                    
+                    document.addEventListener('mousemove', onMouseMove);
+                    document.addEventListener('mouseup', onMouseUp);
+                });
+            }, 4000);
+        };
+        
+        // 调整窗口位置以适应窗口大小变化
+        window.addEventListener('resize', function() {
+            const heartContainer = document.getElementById('heartContainer');
+            const heartWindows = document.querySelectorAll('.heart-window');
+            
+            if (heartWindows.length > 0) {
+                // 移除所有现有窗口
+                heartWindows.forEach(window => {
+                    window.remove();
+                });
+                
+                windowZIndices.clear();
+                
+                // 重新初始化中央窗口
+                const centerWindow = initCenterWindow();
+                
+                // 重新创建窗口
+                const windowCount = createHeartWindows();
+                
+                // 重新显示窗口
+                setTimeout(() => {
+                    showHeartWindowsFountain(windowCount);
+                }, 100);
+            }
+        });
+        
+        // 页面卸载时清理资源
+        window.addEventListener('beforeunload', function() {
+            if (heartRainInstance) {
+                heartRainInstance.destroy();
+            }
+        });
+    </script>
+</body>
+</html>
